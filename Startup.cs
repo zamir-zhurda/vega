@@ -1,10 +1,16 @@
+using System;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using vega.Persistence;
 
 namespace vega
 {
@@ -20,7 +26,20 @@ namespace vega
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+
+            string connectionString = String.Empty;
+            connectionString = Configuration.GetConnectionString("Default");
+
+            //Console.WriteLine("connectionString: ", connectionString);
+            services.AddDbContext<VegaDbContext>(options => options.UseSqlServer(connectionString));
+            ///Fixx
+            // services.AddMvc(option => option.EnableEndpointRouting = false)
+            //     .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+            //     .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+            services.AddAutoMapper(typeof(Startup));
+            //Sic ishte!
+            services.AddControllersWithViews().AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore); ;
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
